@@ -1,10 +1,13 @@
 import cv2 as cv
 from ultralytics import YOLO
 import subprocess
+import threading
 
 model = YOLO('yolov8n.pt')
 TARGET_OBJECT = "cell phone"
 
+def playSound():
+    subprocess.run(['afplay', 'pipe.wav'])
 
 def isTargetPresent(frame, target: str, threshold: float = 0.5) -> bool:
     results = model(frame, verbose=False)
@@ -37,7 +40,9 @@ def runDetection():
             break
         
         if isTargetPresent(frame, TARGET_OBJECT):
-            subprocess.run(['afplay', 'pipe.wav'])
+            # subprocess.Popen(['afplay', 'pipe.wav'])
+            threading.Thread(target=playSound, daemon=True).start()
+
 
 
     cam.release()
