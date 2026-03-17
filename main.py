@@ -5,9 +5,14 @@ import threading
 
 model = YOLO('yolov8n.pt')
 TARGET_OBJECT = "cell phone"
+audio_file = 'pipe.wav'
+isPlaying = False
 
 def playSound():
-    subprocess.run(['afplay', 'pipe.wav'])
+    global isPlaying
+    isPlaying = True
+    subprocess.run(['afplay', audio_file])
+    isPlaying = False
 
 def isTargetPresent(frame, target: str, threshold: float = 0.5) -> bool:
     results = model(frame, verbose=False)
@@ -39,8 +44,8 @@ def runDetection():
         if cv.waitKey(1) & 0xFF == ord('q'):
             break
         
-        if isTargetPresent(frame, TARGET_OBJECT):
-            # subprocess.Popen(['afplay', 'pipe.wav'])
+        if isTargetPresent(frame, TARGET_OBJECT) and not isPlaying:
+        # if isTargetPresent(frame, TARGET_OBJECT):
             threading.Thread(target=playSound, daemon=True).start()
 
 
