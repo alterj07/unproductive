@@ -5,3 +5,6 @@ pipe.wav
 
 package-lock.json
 package.json
+
+yolov8n.pt
+yolov9c.pt

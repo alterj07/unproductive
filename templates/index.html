@@ -7,7 +7,14 @@
 </head>
 <body>
     <h1>are we being productive rn?</h1>
-    <a href="/camera" id="checkButton">Click to lock-in</a>
-
+    <button onclick="goToCamera()">Click to lock-in</button>
+    <script>
+        // Function that will be called on click 
+        // event of "Go to settings window" button
+        function goToCamera(){
+            // ipcRenderer is exposed by preload.js
+            window.ipcRenderer.send('openChildWindow');  
+        }
+    </script>
 </body>
 </html>

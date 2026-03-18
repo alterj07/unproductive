@@ -8,7 +8,14 @@
 <body>
     <h1>are we being productive rn?</h1>
     <h2>HELLO!</h2>
-    <a href="/" id="checkButton">Click to exit</a>
-    
+    <button onclick = "goToFirstWindow()">Click to exit</button>
+    <script>
+        function goToFirstWindow() {
+        //code for some other action to be performed
+
+        //Code to close the window after doing other actions
+            window.ipcRenderer.send('closeChildWindow');
+        }   
+    </script>
 </body>
 </html>
