@@ -1,6 +1,6 @@
 import cv2 as cv
 from ultralytics import YOLO
-import subprocess
+# import subprocess
 import threading
 from pydub import AudioSegment
 from pydub.playback import play
@@ -12,6 +12,7 @@ audio_file = 'pipe.wav'
 isPlaying = False
 dbBoost = 20
 
+#increasing the volume of audio_file by dbBoost decibels and playing it
 def playIncreasedSound():
     global isPlaying
     isPlaying = True
@@ -21,6 +22,7 @@ def playIncreasedSound():
     play(louder_audio)
     isPlaying = False
 
+#checking if the target object is present in the frame with 0.3 threshold
 def isTargetPresent(frame, target: str, threshold: float = 0.3) -> bool:
     results = model(frame, verbose=False)
 
@@ -35,6 +37,7 @@ def isTargetPresent(frame, target: str, threshold: float = 0.3) -> bool:
 
     return False
 
+#main function to run detection loop and show frames
 def runDetection():
     cam = cv.VideoCapture(0)
     while True:
