@@ -2,19 +2,26 @@ import cv2 as cv
 from ultralytics import YOLO
 import subprocess
 import threading
+from pydub import AudioSegment
+from pydub.playback import play
 
-model = YOLO('yolov8n.pt')
+
+model = YOLO('yolov9c.pt')
 TARGET_OBJECT = "cell phone"
 audio_file = 'pipe.wav'
 isPlaying = False
+dbBoost = 20
 
-def playSound():
+def playIncreasedSound():
     global isPlaying
     isPlaying = True
-    subprocess.run(['afplay', audio_file])
+    audio = AudioSegment.from_file(audio_file, format="wav")
+    louder_audio = audio + dbBoost
+    # subprocess.run(['afplay', audio_file])
+    play(louder_audio)
     isPlaying = False
 
-def isTargetPresent(frame, target: str, threshold: float = 0.5) -> bool:
+def isTargetPresent(frame, target: str, threshold: float = 0.3) -> bool:
     results = model(frame, verbose=False)
 
     for result in results:
@@ -46,7 +53,8 @@ def runDetection():
         
         if isTargetPresent(frame, TARGET_OBJECT) and not isPlaying:
         # if isTargetPresent(frame, TARGET_OBJECT):
-            threading.Thread(target=playSound, daemon=True).start()
+            # threading.Thread(target=playSound, daemon=True).start()
+            threading.Thread(target=playIncreasedSound, daemon=True).start()
 
 
 
