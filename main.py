@@ -91,13 +91,13 @@ def video_feed():
 
 @app.route('/')
 def index():
-    return open('templates/camera.html').read()
+    return open('templates/index.html').read()
 
 
 if __name__ == '__main__':
     # Start detection in background thread, then start Flask
     threading.Thread(target=runDetection, daemon=True).start()
-    app.run(port=5000)
+    app.run(host='127.0.0.1', port=5000)
 
 # if __name__ == "__main__":
 #     runDetection()
