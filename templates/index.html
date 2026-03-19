@@ -7,16 +7,18 @@
 </head>
 <body>
     <h1>are we being productive rn?</h1>
-    <button onclick="goToCamera()">Click to lock-in</button>
-    <if true>
+    <button onclick="openCamera()">Click to lock-in</button>
+    <div id = "camera" style = "display:none;">
         <img src="/video_feed" width="640" height="480" />
-    </if>
+    </div>
     <script>
-        // Function that will be called on click 
-        // event of "Go to settings window" button
-        function goToCamera(){
-            // ipcRenderer is exposed by preload.js
-            window.ipcRenderer.send('openChildWindow');  
+        function openCamera() {
+            var x = document.getElementById("camera");
+            if (x.style.display === "none") {
+                x.style.display = "block";
+            } else {
+                x.style.display = "none";
+            }
         }
     </script>
 </body>
