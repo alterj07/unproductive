@@ -18,40 +18,38 @@ function createWindow () {
 }
 
 // Function to create child window of parent one
-function createChildWindow() {
-  childWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-    modal: true,
-    show: false,
-    parent: mainWindow, // Make sure to add parent window here
+// function createChildWindow() {
+//   childWindow = new BrowserWindow({
+//     width: 800,
+//     height: 600,
+//     modal: true,
+//     show: false,
+//     parent: mainWindow,
 
-    // Make sure to add webPreferences with below configuration
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      enableRemoteModule: true,
-      preload: path.join(__dirname, 'preload.js')
-    },
-  });
+//     webPreferences: {
+//       nodeIntegration: true,
+//       contextIsolation: false,
+//       enableRemoteModule: true,
+//       preload: path.join(__dirname, 'preload.js')
+//     },
+//   });
 
-  // Child window loads settings.html file
-  childWindow.loadFile("templates/camera.html");
+//   childWindow.loadFile("templates/index.html");
 
-  childWindow.once("ready-to-show", () => {
-    childWindow.show();
-  });
-}
+//   childWindow.once("ready-to-show", () => {
+//     childWindow.show();
+//   });
+// }
 
-ipcMain.on("openChildWindow", (event, arg) => {
-  createChildWindow();
-});
+// ipcMain.on("openChildWindow", (event, arg) => {
+//   createChildWindow();
+// });
 
-ipcMain.on("closeChildWindow", (event, arg) => {
-  if (childWindow) {
-    childWindow.close();
-  }
-});
+// ipcMain.on("closeChildWindow", (event, arg) => {
+//   if (childWindow) {
+//     childWindow.close();
+//   }
+// });
 
 app.whenReady().then(() => {
   createWindow()

@@ -8,18 +8,21 @@
 <body>
     <h1>are we being productive rn?</h1>
     <button onclick="openCamera()">Click to lock-in</button>
-    <div id = "camera" style = "display:none;">
-        <img src="http://127.0.0.1:5000/video_feed" width="640" height="480" />
-    </div>
+    <button onclick="closeCamera()">Click to rot</button>
+    <img id = "camera" width="640" height="480" />
     <script>
+        const FLASK_URL = "http://sdfsdf.render.com";
+        
         function openCamera() {
-            var x = document.getElementById("camera");
-            if (x.style.display === "none") {
-                x.style.display = "block";
-            } else {
-                x.style.display = "none";
-            }
+            const cam = document.getElementById("camera");
+            cam.src = '${FLASK_URL}/video_feed?t=$(Date.now())';
         }
+
+        function closeCamera() {
+            const cam = document.getElementById("camera");
+            cam.src = '';
+        }
+
     </script>
 </body>
 </html>
