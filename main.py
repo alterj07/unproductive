@@ -1,95 +1,134 @@
 import cv2 as cv
+import base64
+import io
+import os
+from flask import Flask, request, jsonify
 from ultralytics import YOLO
-# import subprocess
-import threading
-from pydub import AudioSegment
-from pydub.playback import play
-
-from flask import Flask, Response
-
-model = YOLO('yolo11n.pt')
-TARGET_OBJECT = "cell phone"
-audio_file = 'pipe.wav'
-dbBoost = 20
-isPlaying = False
-lock = threading.Lock()
-latest_frame = None
+import numpy as np
 
 app = Flask(__name__)
+model = YOLO('yolo11n.pt')
+TARGET_OBJECT = "cell phone"
+CONFIDENCE_THRESHOLD = 0.5
 
-#increasing the volume of audio_file by dbBoost decibels and playing it
-# def playIncreasedSound():
-#     global isPlaying
-#     isPlaying = True
-#     audio = AudioSegment.from_file(audio_file, format="wav")
-#     louder_audio = audio + dbBoost
-#     # subprocess.run(['afplay', audio_file])
-#     play(louder_audio)
-#     isPlaying = False
 
-#checking if the target object is present in the frame with 0.3 threshold
-def isTargetPresent(frame, target: str, threshold: float = 0.5) -> bool:
-    results = model(frame, verbose=False)
-
-    for result in results:
-        for box in result.boxes:
-            confidence = float(box.conf)
-            class_id = int(box.cls)
-            class_name = model.names[class_id]
-
-            if class_name == target and confidence >= threshold:
-                return True
-
-    return False
-
-#main function to run detection loop and show frames
-def runDetection():
-    global latest_frame
-    cam = cv.VideoCapture(0)
+def process_frame_for_detection(frame_data):
+    try:
+        results = model(frame_data, verbose=False)
+        
+        target_found = False
+        detections = []
+        
+        for result in results:
+            for box in result.boxes:
+                confidence = float(box.conf)
+                class_id = int(box.cls)
+                class_name = model.names[class_id]
+                
+                detection_info = {
+                    'class': class_name,
+                    'confidence': float(confidence),
+                    'coordinates': box.xyxy[0].tolist()
+                }
+                detections.append(detection_info)
+                
+                if class_name == TARGET_OBJECT and confidence >= CONFIDENCE_THRESHOLD:
+                    target_found = True
+        
+        return {
+            'target_found': target_found,
+            'detections': detections,
+            'total_detections': len(detections)
+        }
     
-    ret, frame = cam.read()
+    except Exception as e:
+        return {'error': str(e), 'target_found': False}
 
-    if not ret:
-        print("Failed to grab frame")
+
+def annotate_frame_with_detections(frame_data, results):
+    annotated = results[0].plot()
+    _, buffer = cv.imencode('.jpg', annotated)
+    return buffer.tobytes()
+
+
+
+@app.route('/api/detect', methods=['POST'])
+def detect():
+    try:
+        data = request.get_json()
+        
+        if not data or 'image' not in data:
+            return jsonify({'error': 'No image provided'}), 400
+        
+        image_data = base64.b64decode(data['image'])
+        nparr = np.frombuffer(image_data, np.uint8)
+        frame = cv.imdecode(nparr, cv.IMREAD_COLOR)
+        
+        if frame is None:
+            return jsonify({'error': 'Invalid image data'}), 400
+        
+        detection_result = process_frame_for_detection(frame)
+        
+        model_results = model(frame, verbose=False)
+        annotated_jpg = annotate_frame_with_detections(frame, model_results)
+        annotated_base64 = base64.b64encode(annotated_jpg).decode('utf-8')
+        
+        response = {
+            'target_found': detection_result['target_found'],
+            'detections': detection_result['detections'],
+            'annotated_frame': 'data:image/jpeg;base64,' + annotated_base64,
+            'message': f"Found {detection_result['total_detections']} object(s)"
+        }
+        
+        return jsonify(response)
     
-    results = model(frame)
-    annotated_frame = results[0].plot()
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/detect-batch', methods=['POST'])
+def detect_batch():
+    try:
+        data = request.get_json()
+        
+        if not data or 'images' not in data:
+            return jsonify({'error': 'No images provided'}), 400
+        
+        images = data['images']
+        batch_results = []
+        
+        for image_b64 in images:
+            image_data = base64.b64decode(image_b64)
+            nparr = np.frombuffer(image_data, np.uint8)
+            frame = cv.imdecode(nparr, cv.IMREAD_COLOR)
+            
+            if frame is not None:
+                detection_result = process_frame_for_detection(frame)
+                batch_results.append(detection_result)
+        
+        return jsonify({
+            'results': batch_results,
+            'frames_processed': len(batch_results)
+        })
     
-    if isTargetPresent(frame, TARGET_OBJECT) and not isPlaying:
-        threading.Thread(target=playIncreasedSound, daemon=True).start()
-    with lock:
-        latest_frame = annotated_frame.copy()
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({'status': 'healthy', 'server': 'Running'})
 
-    cam.release()
-
-
-def generate_frames():
-    while True:
-        with lock:
-            if latest_frame is None:
-                continue
-            _, buffer = cv.imencode('.jpg', latest_frame)
-
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
-
-# @app.route('/detect')
-# def detect():
-#     return jsonify()
-
-
-@app.route('/video_feed')
-def video_feed():
-    return Response(generate_frames(),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/')
 def index():
-    return open('templates/index.html').read()
-
+    try:
+        with open('templates/index.html', 'r') as f:
+            return f.read()
+    except:
+        return "Frontend not found", 404
 
 if __name__ == '__main__':
-    threading.Thread(target=runDetection, daemon=True).start()
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
 
