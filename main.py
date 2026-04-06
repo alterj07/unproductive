@@ -7,7 +7,7 @@ from ultralytics import YOLO
 import numpy as np
 
 app = Flask(__name__)
-model = YOLO('yolo11n.pt')
+model = YOLO('yolov8n.pt')
 TARGET_OBJECT = "cell phone"
 CONFIDENCE_THRESHOLD = 0.5
 

@@ -17,40 +17,6 @@ function createWindow () {
   mainWindow.loadFile('templates/index.html')
 }
 
-// Function to create child window of parent one
-// function createChildWindow() {
-//   childWindow = new BrowserWindow({
-//     width: 800,
-//     height: 600,
-//     modal: true,
-//     show: false,
-//     parent: mainWindow,
-
-//     webPreferences: {
-//       nodeIntegration: true,
-//       contextIsolation: false,
-//       enableRemoteModule: true,
-//       preload: path.join(__dirname, 'preload.js')
-//     },
-//   });
-
-//   childWindow.loadFile("templates/index.html");
-
-//   childWindow.once("ready-to-show", () => {
-//     childWindow.show();
-//   });
-// }
-
-// ipcMain.on("openChildWindow", (event, arg) => {
-//   createChildWindow();
-// });
-
-// ipcMain.on("closeChildWindow", (event, arg) => {
-//   if (childWindow) {
-//     childWindow.close();
-//   }
-// });
-
 app.whenReady().then(() => {
   createWindow()
 
