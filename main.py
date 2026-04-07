@@ -1,6 +1,5 @@
 import cv2 as cv
 import base64
-import io
 import os
 from flask import Flask, request, jsonify
 from ultralytics import YOLO
