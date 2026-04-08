@@ -1,7 +1,7 @@
 import cv2 as cv
 import base64
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 from ultralytics import YOLO
 import numpy as np
@@ -123,11 +123,7 @@ def health_check():
 
 @app.route('/')
 def index():
-    try:
-        with open('templates/index.html', 'r') as f:
-            return f.read()
-    except:
-        return "Frontend not found", 404
+    return render_template('templates/index.html')
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
