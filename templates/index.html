@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>unproductive</title>
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <meta http-equiv="Content-Security-Policy" content="connect-src 'self' http://localhost:* https://*; img-src 'self' data: blob:;" />
     <style>
         button {
             padding: 10px 20px;
@@ -39,6 +39,7 @@
 
         async function sendFrameToBackend(imageBase64) {
             const backendUrl = window.location.origin;
+            console.log(backendUrl);
             
             try {
                 const response = await fetch(`${backendUrl}/api/detect`, {
