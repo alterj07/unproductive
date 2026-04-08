@@ -9,3 +9,5 @@ package.json
 yolov8n.pt
 yolov9c.pt
 yolov11n.pt
+
+.python-version
