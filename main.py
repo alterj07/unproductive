@@ -2,10 +2,12 @@ import cv2 as cv
 import base64
 import os
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from ultralytics import YOLO
 import numpy as np
 
 app = Flask(__name__)
+CORS(app)
 model = YOLO('yolov8n.pt')
 TARGET_OBJECT = "cell phone"
 CONFIDENCE_THRESHOLD = 0.5
