@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>unproductive</title>
-    <meta http-equiv="Content-Security-Policy" content="connect-src 'self' http://localhost:* https://*; img-src 'self' data: blob:;" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' electron: 'unsafe-inline'; connect-src 'self' http://localhost:* https://*; img-src 'self' data: blob:;" />
     <style>
         button {
             padding: 10px 20px;
@@ -38,7 +38,7 @@
         const FRAME_SEND_INTERVAL = 50;
 
         async function sendFrameToBackend(imageBase64) {
-            const backendUrl = window.location.origin;
+            const backendUrl = "https://unproductive.onrender.com"
             console.log(backendUrl);
             
             try {
@@ -79,7 +79,9 @@
                 
                 const video = document.createElement('video');
                 video.srcObject = videoStream;
-                video.play();
+                video.style.display = 'none';
+                document.body.appendChild(video);
+                await video.play();
                 
                 isDetecting = true;
                 
