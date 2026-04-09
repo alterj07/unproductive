@@ -13,6 +13,14 @@ function createWindow () {
       preload: path.join(__dirname, 'preload.js')
     }
   })
+  
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+    if (permission === 'media') {
+      callback(true);
+    } else {
+      callback(false);
+    }
+  });
 
   mainWindow.loadFile('templates/index.html')
 }
